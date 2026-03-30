@@ -1,0 +1,2638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VibeTrip - 旅行人格测试</title>
+    <script>
+        window.__ensureVibeTripReact = async function () {
+            if (window.React && window.ReactDOM) return;
+
+            const loadScript = (src) => new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.async = true;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+
+            const reactCandidates = [
+                'https://unpkg.com/react@18/umd/react.development.js',
+                'https://cdn.jsdelivr.net/npm/react@18/umd/react.development.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js'
+            ];
+            const reactDomCandidates = [
+                'https://unpkg.com/react-dom@18/umd/react-dom.development.js',
+                'https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.development.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js'
+            ];
+
+            let lastError;
+            for (const src of reactCandidates) {
+                if (window.React) break;
+                try {
+                    await loadScript(src);
+                } catch (e) {
+                    lastError = e;
+                }
+            }
+            for (const src of reactDomCandidates) {
+                if (window.ReactDOM) break;
+                try {
+                    await loadScript(src);
+                } catch (e) {
+                    lastError = e;
+                }
+            }
+
+            if (!window.React || !window.ReactDOM) {
+                throw lastError || new Error('React/ReactDOM 加载失败');
+            }
+        };
+
+        window.tailwind = window.tailwind || {};
+        window.tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        accent: '#8B5CF6',
+                    },
+                },
+            }
+        };
+    </script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .bg-gradient-custom {
+            background: linear-gradient(to bottom right, #1e3a8a, #4f46e5);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div id="app">
+        <div style="padding:24px;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;line-height:1.6;color:#111;background:#fff">
+            <div style="font-size:20px;font-weight:700;margin-bottom:8px">VibeTrip</div>
+            <div style="margin-bottom:8px">页面正在加载中…</div>
+            <div style="font-size:14px;color:#444">
+                如果你看到这里一直没有进入测试界面，通常是因为当前打开方式禁用了脚本或拦截了外部资源（例如 IDE 预览、公司网络拦截 CDN、浏览器禁用 JavaScript）。
+                <br />
+                建议：用浏览器直接打开该 HTML，或用本地服务器方式打开；也可以按 F12 查看控制台报错。
+            </div>
+        </div>
+        <noscript>
+            <div style="padding:24px;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;line-height:1.6;color:#111;background:#fff">
+                <div style="font-size:18px;font-weight:700;margin-bottom:8px">检测到 JavaScript 被禁用</div>
+                <div>请在浏览器中启用 JavaScript 后刷新页面。</div>
+            </div>
+        </noscript>
+    </div>
+    
+    <script>
+        // 测试题目数据（优化后）
+        const quizQuestions = [
+            {
+                id: 'q1',
+                question: '你最喜欢哪种类型的风景？（可多选）',
+                multiSelect: true,
+                options: [
+                    {
+                        id: 'q1-a',
+                        text: '阳光沙滩与蔚蓝大海',
+                        tags: ['beach', 'ocean', 'relax', 'warm', 'scenic'],
+                        imageKeyword: 'sunny beach'
+                    },
+                    {
+                        id: 'q1-b',
+                        text: '壮丽山脉与森林湖泊',
+                        tags: ['mountain', 'nature', 'forest', 'serene', 'active'],
+                        imageKeyword: 'mountain landscape'
+                    },
+                    {
+                        id: 'q1-c',
+                        text: '历史古迹与人文景观',
+                        tags: ['culture', 'history', 'art', 'learning', 'urban'],
+                        imageKeyword: 'ancient architecture'
+                    },
+                    {
+                        id: 'q1-d',
+                        text: '现代都市与繁华街景',
+                        tags: ['urban', 'modern', 'shopping', 'nightlife'],
+                        imageKeyword: 'city skyline'
+                    },
+                    {
+                        id: 'q1-e',
+                        text: '独特地貌与自然奇观',
+                        tags: ['desert', 'unique-landscape', 'adventure', 'quiet'],
+                        imageKeyword: 'unique landscape'
+                    }
+                ]
+            },
+            {
+                id: 'q2',
+                question: '对于旅行预算，你的态度是？',
+                options: [
+                    {
+                        id: 'q2-a',
+                        text: '精打细算，追求性价比，把钱花在刀刃上',
+                        tags: ['budget', 'practical', 'independent'],
+                        imageKeyword: 'budget travel'
+                    },
+                    {
+                        id: 'q2-b',
+                        text: '该省省，该花花，体验与舒适并重',
+                        tags: ['balanced', 'comfort', 'flexible'],
+                        imageKeyword: 'comfortable travel'
+                    },
+                    {
+                        id: 'q2-c',
+                        text: '享受奢华，追求极致体验，预算不是问题',
+                        tags: ['luxury', 'indulgence', 'premium', 'comfort'],
+                        imageKeyword: 'luxury travel'
+                    }
+                ]
+            },
+            {
+                id: 'q3',
+                question: '你更倾向于和谁一起旅行？',
+                options: [
+                    {
+                        id: 'q3-a',
+                        text: '独自一人，享受自由与独处',
+                        tags: ['solo', 'independent', 'introspective'],
+                        imageKeyword: 'solo traveler'
+                    },
+                    {
+                        id: 'q3-b',
+                        text: '与伴侣或好友，分享快乐与经历',
+                        tags: ['couple', 'friends', 'social', 'shared-experience'],
+                        imageKeyword: 'friends traveling'
+                    },
+                    {
+                        id: 'q3-c',
+                        text: '全家出游，创造温馨的亲子时光',
+                        tags: ['family', 'group', 'bonding', 'child-friendly'],
+                        imageKeyword: 'family vacation'
+                    }
+                ]
+            },
+            {
+                id: 'q4',
+                question: '哪种自然风光最能触动你的心弦？',
+                options: [
+                    {
+                        id: 'q4-a',
+                        text: '阳光普照的沙滩与蔚蓝大海',
+                        tags: ['beach', 'ocean', 'relax', 'warm', 'scenic'],
+                        imageKeyword: 'sunny beach'
+                    },
+                    {
+                        id: 'q4-b',
+                        text: '壮丽的山脉、森林与湖泊',
+                        tags: ['nature', 'mountain', 'forest', 'serene', 'active'],
+                        imageKeyword: 'mountain landscape'
+                    },
+                    {
+                        id: 'q4-c',
+                        text: '广袤无垠的沙漠或神秘的峡谷',
+                        tags: ['desert', 'unique-landscape', 'adventure', 'quiet'],
+                        imageKeyword: 'desert landscape'
+                    },
+                    {
+                        id: 'q4-d',
+                        text: '冰雪覆盖的极地风光或北欧峡湾',
+                        tags: ['cold', 'unique-landscape', 'adventure', 'scenic'],
+                        imageKeyword: 'arctic landscape'
+                    }
+                ]
+            },
+            {
+                id: 'q5',
+                question: '在旅途中，你对"吃"的优先级是？',
+                options: [
+                    {
+                        id: 'q5-a',
+                        text: '简单果腹即可，不追求特色',
+                        tags: ['practical', 'simple-food'],
+                        imageKeyword: 'simple meal'
+                    },
+                    {
+                        id: 'q5-b',
+                        text: '尝试当地特色小吃，体验风土人情',
+                        tags: ['foodie', 'local-cuisine', 'culture', 'adventurous-eater'],
+                        imageKeyword: 'street food'
+                    },
+                    {
+                        id: 'q5-c',
+                        text: '寻找米其林餐厅或高级料理，享受美食艺术',
+                        tags: ['luxury', 'gourmet', 'fine-dining', 'foodie'],
+                        imageKeyword: 'fine dining'
+                    }
+                ]
+            },
+            {
+                id: 'q6',
+                question: '面对旅行中的突发状况，你的反应是？',
+                options: [
+                    {
+                        id: 'q6-a',
+                        text: '提前规划，尽量避免意外，不喜欢变化',
+                        tags: ['planner', 'cautious', 'organized'],
+                        imageKeyword: 'travel planning'
+                    },
+                    {
+                        id: 'q6-b',
+                        text: '随遇而安，灵活应对，享受不确定性',
+                        tags: ['flexible', 'spontaneous', 'adaptable'],
+                        imageKeyword: 'spontaneous travel'
+                    },
+                    {
+                        id: 'q6-c',
+                        text: '寻求帮助，相信总有解决办法',
+                        tags: ['resourceful', 'community', 'problem-solver'],
+                        imageKeyword: 'travel help'
+                    }
+                ]
+            },
+            {
+                id: 'q7',
+                question: '旅行结束后，你最希望带回家的"纪念品"是？',
+                options: [
+                    {
+                        id: 'q7-a',
+                        text: '精美的当地手工艺品或特色商品',
+                        tags: ['souvenir', 'shopping', 'culture'],
+                        imageKeyword: 'local crafts'
+                    },
+                    {
+                        id: 'q7-b',
+                        text: '独特的照片和视频，记录美好瞬间',
+                        tags: ['photography', 'memory', 'visual'],
+                        imageKeyword: 'travel photography'
+                    },
+                    {
+                        id: 'q7-c',
+                        text: '新的知识、技能或对世界的深刻理解',
+                        tags: ['learning', 'personal-growth', 'intellectual'],
+                        imageKeyword: 'travel learning'
+                    },
+                    {
+                        id: 'q7-d',
+                        text: '轻松愉悦的心情和充沛的精力',
+                        tags: ['wellness', 'relaxation', 'rejuvenation'],
+                        imageKeyword: 'relaxed person'
+                    }
+                ]
+            },
+            {
+                id: 'q8',
+                question: '你对旅行中的"社交"活动持何种态度？',
+                options: [
+                    {
+                        id: 'q8-a',
+                        text: '倾向于独处，避免过多社交',
+                        tags: ['introverted', 'quiet', 'independent'],
+                        imageKeyword: 'person alone'
+                    },
+                    {
+                        id: 'q8-b',
+                        text: '乐于结识新朋友，参与当地活动',
+                        tags: ['extroverted', 'social', 'community', 'interactive'],
+                        imageKeyword: 'people meeting'
+                    },
+                    {
+                        id: 'q8-c',
+                        text: '随缘社交，不强求，但也不排斥',
+                        tags: ['balanced', 'flexible-social'],
+                        imageKeyword: 'casual social'
+                    }
+                ]
+            },
+            {
+                id: 'q13',
+                question: '你认为旅行的主要目的是什么？',
+                options: [
+                    {
+                        id: 'q13-a',
+                        text: '放松身心，远离日常压力',
+                        tags: ['relaxation', 'stress-relief', 'wellness'],
+                        imageKeyword: 'relaxing spa'
+                    },
+                    {
+                        id: 'q13-b',
+                        text: '探索新事物，开阔眼界',
+                        tags: ['exploration', 'learning', 'curiosity'],
+                        imageKeyword: 'exploring new place'
+                    },
+                    {
+                        id: 'q13-c',
+                        text: '创造回忆，与 loved ones 共享时光',
+                        tags: ['bonding', 'memory-making', 'social'],
+                        imageKeyword: 'family memories'
+                    },
+                    {
+                        id: 'q13-d',
+                        text: '挑战自我，突破舒适区',
+                        tags: ['adventure', 'personal-growth', 'challenge'],
+                        imageKeyword: 'extreme adventure'
+                    }
+                ]
+            },
+            {
+                id: 'q10',
+                question: '你偏好的交通方式是？（可多选）',
+                multiSelect: true,
+                options: [
+                    {
+                        id: 'q10-a',
+                        text: '高铁/动车',
+                        tags: ['transport-highspeed', 'domestic', 'fast'],
+                        imageKeyword: 'high speed train'
+                    },
+                    {
+                        id: 'q10-b',
+                        text: '飞机',
+                        tags: ['transport-plane', 'international', 'long-distance'],
+                        imageKeyword: 'airplane window'
+                    },
+                    {
+                        id: 'q10-c',
+                        text: '自驾',
+                        tags: ['transport-car', 'flexible', 'road-trip'],
+                        imageKeyword: 'road trip'
+                    },
+                    {
+                        id: 'q10-d',
+                        text: '大巴/火车',
+                        tags: ['transport-bus', 'budget', 'slow'],
+                        imageKeyword: 'bus travel'
+                    },
+                    {
+                        id: 'q10-e',
+                        text: '船/轮渡',
+                        tags: ['transport-boat', 'scenic', 'relax'],
+                        imageKeyword: 'ferry boat'
+                    },
+                    {
+                        id: 'q10-f',
+                        text: '不限/随缘',
+                        tags: ['transport-any', 'flexible'],
+                        imageKeyword: 'travel'
+                    }
+                ]
+            },
+            {
+                id: 'q11',
+                question: '你能够接受的交通时间是？',
+                options: [
+                    {
+                        id: 'q11-a',
+                        text: '2小时以内，周边短途游',
+                        tags: ['time-short', 'nearby', 'weekend'],
+                        imageKeyword: 'weekend getaway'
+                    },
+                    {
+                        id: 'q11-b',
+                        text: '2-5小时，省内或邻省',
+                        tags: ['time-medium', 'domestic', 'short-trip'],
+                        imageKeyword: 'short trip'
+                    },
+                    {
+                        id: 'q11-c',
+                        text: '5-10小时，国内长途',
+                        tags: ['time-long', 'domestic', 'long-trip'],
+                        imageKeyword: 'domestic travel'
+                    },
+                    {
+                        id: 'q11-d',
+                        text: '10小时以上，国际长途',
+                        tags: ['time-verylong', 'international', 'overseas'],
+                        imageKeyword: 'international flight'
+                    },
+                    {
+                        id: 'q11-e',
+                        text: '不限/随缘',
+                        tags: ['time-any', 'flexible'],
+                        imageKeyword: 'travel'
+                    }
+                ]
+            },
+            {
+                id: 'q12',
+                question: '你偏好的旅行目的地范围是？',
+                options: [
+                    {
+                        id: 'q12-a',
+                        text: '只在国内游玩',
+                        tags: ['domestic-only', 'china'],
+                        imageKeyword: 'China travel'
+                    },
+                    {
+                        id: 'q12-b',
+                        text: '国内为主，偶尔考虑周边国家',
+                        tags: ['domestic-priority', 'nearby-international'],
+                        imageKeyword: 'Asia travel'
+                    },
+                    {
+                        id: 'q12-c',
+                        text: '国内外都可以，看情况',
+                        tags: ['flexible', 'both'],
+                        imageKeyword: 'world travel'
+                    },
+                    {
+                        id: 'q12-d',
+                        text: '希望去国外探索',
+                        tags: ['international-priority', 'overseas'],
+                        imageKeyword: 'international travel'
+                    }
+                ]
+            },
+            {
+                id: 'q9',
+                question: '你计划从哪个城市出发？',
+                type: 'text-input',
+                placeholder: '请输入你的出发城市（例如：深圳、杭州、武汉等）',
+                tags: ['departure-custom'],
+                imageKeyword: 'city skyline'
+            }
+        ];
+
+        // 根据用户答案分析并推荐目的地
+        const analyzeAndRecommend = (userAnswers) => {
+            try {
+                // 统计用户偏好标签
+                const tagCounts = {};
+                userAnswers.forEach(answer => {
+                    if (answer.tags && Array.isArray(answer.tags)) {
+                        answer.tags.forEach(tag => {
+                            tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+                        });
+                    }
+                });
+
+                // 判断主要偏好
+                const prefersBeach = tagCounts['beach'] > 0 || tagCounts['ocean'] > 0;
+                const prefersMountain = tagCounts['mountain'] > 0 || tagCounts['nature'] > 0;
+                const prefersCulture = tagCounts['culture'] > 0 || tagCounts['history'] > 0 || tagCounts['art'] > 0;
+                const prefersAdventure = tagCounts['adventure'] > 0 || tagCounts['challenge'] > 0;
+                const prefersRelax = tagCounts['relax'] > 0 || tagCounts['wellness'] > 0;
+                const prefersLuxury = tagCounts['luxury'] > 0;
+                const prefersBudget = tagCounts['budget'] > 0;
+
+                // 判断出发城市
+                let departureCity = Object.keys(tagCounts).find(tag => tag.startsWith('departure-')) || 'departure-other';
+                
+                // 如果是自定义城市，从用户答案中获取城市名称
+                if (departureCity === 'departure-custom') {
+                    const cityAnswer = userAnswers.find(answer => answer.questionId === 'q9');
+                    if (cityAnswer && cityAnswer.textInput) {
+                        const cityName = cityAnswer.textInput;
+                        if (cityName.includes('深圳')) {
+                            departureCity = 'departure-shenzhen';
+                        } else if (cityName.includes('北京')) {
+                            departureCity = 'departure-beijing';
+                        } else if (cityName.includes('上海')) {
+                            departureCity = 'departure-shanghai';
+                        } else if (cityName.includes('广州')) {
+                            departureCity = 'departure-guangzhou';
+                        } else if (cityName.includes('成都')) {
+                            departureCity = 'departure-chengdu';
+                        }
+                    }
+                }
+                
+                // 判断交通时间偏好（优先查找具体时间，而不是"不限"）
+                const timePreference = Object.keys(tagCounts).find(tag => 
+                    tag === 'time-short' || 
+                    tag === 'time-medium' || 
+                    tag === 'time-long' || 
+                    tag === 'time-verylong'
+                ) || 'time-medium';
+                
+                // 判断目的地范围偏好
+                const scopePreference = Object.keys(tagCounts).find(tag => 
+                    tag === 'domestic-only' || 
+                    tag === 'domestic-priority' || 
+                    tag === 'flexible' || 
+                    tag === 'international-priority'
+                ) || 'flexible';
+
+                // 判断是否只在国内游玩
+                const domesticOnly = scopePreference === 'domestic-only' || scopePreference === 'domestic-priority';
+                const internationalOnly = scopePreference === 'international-priority';
+
+                console.log('调试信息:', {
+                    departureCity,
+                    timePreference,
+                    scopePreference,
+                    domesticOnly,
+                    internationalOnly,
+                    tagCounts: Object.keys(tagCounts),
+                    allTags: tagCounts,
+                    userAnswers: userAnswers.map(a => ({ questionId: a.questionId, answer: a.answer, textInput: a.textInput }))
+                });
+
+                // 如果用户明确选择只在国内游玩，强制只推荐国内景点
+                if (domesticOnly) {
+                    console.log('用户选择只在国内游玩，强制推荐国内景点');
+                }
+
+                console.log('当前推荐逻辑:', {
+                    departureCity,
+                    timePreference,
+                    willUseShenzhenLogic: departureCity === 'departure-shenzhen' && timePreference === 'time-medium'
+                });
+
+                // 根据出发城市和交通时间推荐周边景点
+                let destinations = [];
+
+                // 定义各城市周边景点
+                const nearbyDestinations = {
+                    'departure-beijing': [
+                        {
+                            name: "八达岭长城",
+                            country: "中国北京延庆",
+                            reason: "距离北京仅1.5小时，万里长城精华段，不到长城非好汉。",
+                            image_url: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80"
+                        },
+                        {
+                            name: "古北水镇",
+                            country: "中国北京密云",
+                            reason: "北京周边的江南水乡，司马台长城脚下，夜景璀璨。",
+                            image_url: "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=800&q=80"
+                        },
+                        {
+                            name: "天津五大道",
+                            country: "中国天津",
+                            reason: "高铁30分钟直达，万国建筑博览，历史文化街区。",
+                            image_url: "https://images.unsplash.com/photo-1584952811565-c90e3d7d4a39?w=800&q=80"
+                        },
+                        {
+                            name: "北戴河海滨",
+                            country: "中国河北秦皇岛",
+                            reason: "高铁2小时，北方著名海滨避暑胜地，沙滩浴场。",
+                            image_url: "https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?w=800&q=80"
+                        }
+                    ],
+                    'departure-shanghai': [
+                        {
+                            name: "苏州拙政园",
+                            country: "中国江苏苏州",
+                            reason: "高铁30分钟，中国四大名园之首，江南园林典范。",
+                            image_url: "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=800&q=80"
+                        },
+                        {
+                            name: "杭州西湖",
+                            country: "中国浙江杭州",
+                            reason: "高铁1小时，西湖十景，诗情画意，江南美景。",
+                            image_url: "https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&q=80"
+                        },
+                        {
+                            name: "周庄古镇",
+                            country: "中国江苏昆山",
+                            reason: "高铁1小时，中国第一水乡，小桥流水人家。",
+                            image_url: "https://images.unsplash.com/photo-1508804052814-cd3ba865a116?w=800&q=80"
+                        },
+                        {
+                            name: "乌镇西栅",
+                            country: "中国浙江桐乡",
+                            reason: "高铁1.5小时，江南水乡代表，夜景如梦如幻。",
+                            image_url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+                        }
+                    ],
+                    'departure-guangzhou': [
+                        {
+                            name: "广州长隆野生动物世界",
+                            country: "中国广东广州",
+                            reason: "市区内，国内顶级野生动物园，亲子游首选。",
+                            image_url: "https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?w=800&q=80"
+                        },
+                        {
+                            name: "佛山祖庙",
+                            country: "中国广东佛山",
+                            reason: "地铁直达，岭南建筑瑰宝，黄飞鸿武术文化。",
+                            image_url: "https://images.unsplash.com/photo-1584952811565-c90e3d7d4a39?w=800&q=80"
+                        },
+                        {
+                            name: "深圳世界之窗",
+                            country: "中国广东深圳",
+                            reason: "高铁30分钟，微缩世界景观，一日游遍全球。",
+                            image_url: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=800&q=80"
+                        },
+                        {
+                            name: "珠海长隆海洋王国",
+                            country: "中国广东珠海",
+                            reason: "高铁1小时，世界顶级海洋主题公园，鲸鲨馆震撼。",
+                            image_url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80"
+                        }
+                    ],
+                    'departure-chengdu': [
+                        {
+                            name: "青城山",
+                            country: "中国四川都江堰",
+                            reason: "高铁30分钟，道教名山，青城天下幽，避暑胜地。",
+                            image_url: "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=800&q=80"
+                        },
+                        {
+                            name: "都江堰水利工程",
+                            country: "中国四川都江堰",
+                            reason: "高铁30分钟，世界文化遗产，千年水利工程奇迹。",
+                            image_url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+                        },
+                        {
+                            name: "乐山大佛",
+                            country: "中国四川乐山",
+                            reason: "高铁1小时，世界最大石刻佛像，三江汇流壮观。",
+                            image_url: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80"
+                        },
+                        {
+                            name: "峨眉山",
+                            country: "中国四川峨眉山",
+                            reason: "高铁1.5小时，中国四大佛教名山，金顶日出云海。",
+                            image_url: "https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&q=80"
+                        }
+                    ],
+                    'departure-shenzhen': [
+                        {
+                            name: "广州长隆野生动物世界",
+                            country: "中国广东广州",
+                            reason: "高铁30分钟，国内顶级野生动物园，亲子游首选。",
+                            image_url: "https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?w=800&q=80"
+                        },
+                        {
+                            name: "广州塔",
+                            country: "中国广东广州",
+                            reason: "高铁30分钟，广州地标性建筑，俯瞰珠江新城夜景。",
+                            image_url: "https://images.unsplash.com/photo-1584952811565-c90e3d7d4a39?w=800&q=80"
+                        },
+                        {
+                            name: "厦门鼓浪屿",
+                            country: "中国福建厦门",
+                            reason: "高铁3小时，海上花园，万国建筑博览，文艺小资。",
+                            image_url: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&q=80"
+                        },
+                        {
+                            name: "长沙橘子洲头",
+                            country: "中国湖南长沙",
+                            reason: "高铁3.5小时，湘江中心，青年毛泽东雕像，红色旅游。",
+                            image_url: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80"
+                        }
+                    ],
+                    'departure-other': [
+                        {
+                            name: "本地城市公园",
+                            country: "本地",
+                            reason: "就近选择，周末休闲放松，亲近自然。",
+                            image_url: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80"
+                        },
+                        {
+                            name: "周边古镇",
+                            country: "周边",
+                            reason: "短途自驾，体验传统文化，品尝地道美食。",
+                            image_url: "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=800&q=80"
+                        },
+                        {
+                            name: "邻近城市",
+                            country: "邻近",
+                            reason: "高铁或自驾可达，探索不同城市风貌。",
+                            image_url: "https://images.unsplash.com/photo-1584952811565-c90e3d7d4a39?w=800&q=80"
+                        },
+                        {
+                            name: "省内著名景点",
+                            country: "省内",
+                            reason: "深度体验本地文化，发现身边的美景。",
+                            image_url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+                        }
+                    ]
+                };
+
+                // 如果用户只接受短途交通（2小时内）
+                if (timePreference === 'time-short') {
+                    // 如果用户选择只在国内游玩，推荐国内短途景点
+                    if (domesticOnly) {
+                        destinations = nearbyDestinations[departureCity] || nearbyDestinations['departure-other'];
+                    } else {
+                        // 否则推荐周边短途景点
+                        destinations = nearbyDestinations[departureCity] || nearbyDestinations['departure-other'];
+                    }
+                } 
+                // 如果用户接受中长途（2-5小时）
+                else if (timePreference === 'time-medium') {
+                    if (domesticOnly) {
+                        // 根据出发城市推荐2-5小时可达的景点
+                        if (departureCity === 'departure-shenzhen') {
+                            if (prefersBeach) {
+                                destinations = [
+                                    {
+                                        name: "厦门鼓浪屿",
+                                        country: "中国福建厦门",
+                                        reason: "高铁3小时，海上花园，万国建筑博览，文艺小资。",
+                                        image_url: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&q=80"
+                                    },
+                                    {
+                                        name: "北海银滩",
+                                        country: "中国广西北海",
+                                        reason: "高铁4.5小时，天下第一滩，十里银沙，海滨度假。",
+                                        image_url: "https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?w=800&q=80"
+                                    },
+                                    {
+                                        name: "阳江海陵岛",
+                                        country: "中国广东阳江",
+                                        reason: "高铁3.5小时，南方北戴河，十里银滩，海鲜美食。",
+                                        image_url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80"
+                                    },
+                                    {
+                                        name: "惠州巽寮湾",
+                                        country: "中国广东惠州",
+                                        reason: "高铁1.5小时，广东马尔代夫，水清沙白，度假胜地。",
+                                        image_url: "https://images.unsplash.com/photo-1565992441121-4367c2967103?w=800&q=80"
+                                    }
+                                ];
+                            } else if (prefersMountain) {
+                                destinations = [
+                                    {
+                                        name: "桂林漓江",
+                                        country: "中国广西桂林",
+                                        reason: "高铁3小时，山水甲天下，竹筏漂流，诗意山水。",
+                                        image_url: "https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&q=80"
+                                    },
+                                    {
+                                        name: "张家界天门山",
+                                        country: "中国湖南张家界",
+                                        reason: "高铁5小时，世界最长玻璃栈道，俯瞰万丈深渊。",
+                                        image_url: "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=800&q=80"
+                                    },
+                                    {
+                                        name: "衡山",
+                                        country: "中国湖南衡阳",
+                                        reason: "高铁3.5小时，五岳独秀，祝融峰日出，佛教圣地。",
+                                        image_url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+                                    },
+                                    {
+                                        name: "丹霞山",
+                                        country: "中国广东韶关",
+                                        reason: "高铁1.5小时，世界自然遗产，丹霞地貌，红石公园。",
+                                        image_url: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80"
+                                    }
+                                ];
+                            } else if (prefersCulture) {
+                                destinations = [
+                                    {
+                                        name: "武汉黄鹤楼",
+                                        country: "中国湖北武汉",
+                                        reason: "高铁4小时，天下江山第一楼，长江大桥，荆楚文化。",
+                                        image_url: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80"
+                                    },
+                                    {
+                                        name: "长沙岳麓书院",
+                                        country: "中国湖南长沙",
+                                        reason: "高铁3.5小时，千年学府，岳麓山，湘江风光。",
+                                        image_url: "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=800&q=80"
+                                    },
+                                    {
+                                        name: "桂林象鼻山",
+                                        country: "中国广西桂林",
+                                        reason: "高铁3小时，桂林城徽，漓江精华段，山水甲天下。",
+                                        image_url: "https://images.unsplash.com/photo-1508804052814-cd3ba865a116?w=800&q=80"
+                                    },
+                                    {
+                                        name: "广州陈家祠",
+                                        country: "中国广东广州",
+                                        reason: "高铁30分钟，岭南建筑瑰宝，民间工艺博物馆。",
+                                        image_url: "https://images.unsplash.com/photo-1584952811565-c90e3d7d4a39?w=800&q=80"
+                                    }
+                                ];
+                            } else {
+                                destinations = [
+                                    {
+                                        name: "广州长隆野生动物世界",
+                                        country: "中国广东广州",
+                                        reason: "高铁30分钟，国内顶级野生动物园，亲子游首选。",
+                                        image_url: "https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?w=800&q=80"
+                                    },
+                                    {
+                                        name: "厦门鼓浪屿",
+                                        country: "中国福建厦门",
+                                        reason: "高铁3小时，海上花园，万国建筑博览，文艺小资。",
+                                        image_url: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&q=80"
+                                    },
+                                    {
+                                        name: "长沙橘子洲头",
+                                        country: "中国湖南长沙",
+                                        reason: "高铁3.5小时，湘江中心，青年毛泽东雕像，红色旅游。",
+                                        image_url: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80"
+                                    },
+                                    {
+                                        name: "武汉黄鹤楼",
+                                        country: "中国湖北武汉",
+                                        reason: "高铁4小时，天下江山第一楼，长江大桥，荆楚文化。",
+                                        image_url: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80"
+                                    }
+                                ];
+                            }
+                        } else if (departureCity === 'departure-beijing') {
+                            // 北京出发2-5小时推荐
+                            if (prefersBeach) {
+                                     destinations = [
+                                         {
+                                             name: "北戴河海滨",
+                                             country: "中国河北秦皇岛",
+                                             reason: "高铁2小时，北方著名海滨避暑胜地，沙滩浴场。",
+                                             image_url: "https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?w=800&q=80"
+                                         },
+                                         {
+                                             name: "青岛栈桥",
+                                             country: "中国山东青岛",
+                                             reason: "高铁3小时，北方海滨城市，啤酒文化，海鲜美食。",
+                                             image_url: "https://images.unsplash.com/photo-1565992441121-4367c2967103?w=800&q=80"
+                                         },
+                                         {
+                                             name: "大连金石滩",
+                                             country: "中国辽宁大连",
+                                             reason: "高铁4.5小时，北方最美海滩，奇石海岸，地质奇观。",
+                                             image_url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80"
+                                         },
+                                         {
+                                             name: "威海刘公岛",
+                                             country: "中国山东威海",
+                                             reason: "高铁4小时，甲午海战纪念地，海岛风光，历史教育。",
+                                             image_url: "https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?w=800&q=80"
+                                         }
+                                     ];
+                                 } else if (prefersMountain) {
+                                     destinations = [
+                                         {
+                                             name: "泰山玉皇顶",
+                                             country: "中国山东泰安",
+                                             reason: "高铁2小时，五岳之首，登泰山而小天下，日出云海壮观。",
+                                             image_url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+                                         },
+                                         {
+                                             name: "五台山",
+                                             country: "中国山西忻州",
+                                             reason: "高铁3.5小时，中国四大佛教名山之首，文殊菩萨道场。",
+                                             image_url: "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=800&q=80"
+                                         },
+                                         {
+                                             name: "恒山悬空寺",
+                                             country: "中国山西大同",
+                                             reason: "高铁2.5小时，悬挂在峭壁上的千年古寺，建筑奇迹。",
+                                             image_url: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80"
+                                         },
+                                         {
+                                             name: "云台山",
+                                             country: "中国河南焦作",
+                                             reason: "高铁3小时，世界地质公园，红石峡，瀑布群。",
+                                             image_url: "https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&q=80"
+                                         }
+                                     ];
+                                 } else if (prefersCulture) {
+                                     destinations = [
+                                         {
+                                             name: "平遥古城",
+                                             country: "中国山西晋中",
+                                             reason: "高铁3.5小时，世界文化遗产，保存完整的明清古城。",
+                                             image_url: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80"
+                                         },
+                                         {
+                                             name: "曲阜孔庙",
+                                             country: "中国山东曲阜",
+                                             reason: "高铁2小时，孔子故里，儒家文化发源地，世界文化遗产。",
+                                             image_url: "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=800&q=80"
+                                         },
+                                         {
+                                             name: "洛阳龙门石窟",
+                                             country: "中国河南洛阳",
+                                             reason: "高铁2.5小时，中国四大石窟之一，千年石刻艺术宝库。",
+                                             image_url: "https://images.unsplash.com/photo-1508804052814-cd3ba865a116?w=800&q=80"
+                                         },
+                                         {
+                                             name: "西安兵马俑",
+                                             country: "中国陕西西安",
+                                             reason: "高铁4小时，世界第八大奇迹，秦始皇陵陪葬坑。",
+                                             image_url: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80"
+                                         }
+                                     ];
+                                 } else {
+                                     destinations = [
+                                         {
+                                             name: "天津五大道",
+                                             country: "中国天津",
+                                             reason: "高铁30分钟，万国建筑博览，历史文化街区。",
+                                             image_url: "https://images.unsplash.com/photo-1584952811565-c90e3d7d4a39?w=800&q=80"
+                                         },
+                                         {
+                                             name: "泰山玉皇顶",
+                                             country: "中国山东泰安",
+                                             reason: "高铁2小时，五岳之首，登泰山而小天下。",
+                                             image_url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+                                         },
+                                         {
+                                             name: "平遥古城",
+                                             country: "中国山西晋中",
+                                             reason: "高铁3.5小时，世界文化遗产，保存完整的明清古城。",
+                                             image_url: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80"
+                                         },
+                                         {
+                                             name: "北戴河海滨",
+                                             country: "中国河北秦皇岛",
+                                             reason: "高铁2小时，北方著名海滨避暑胜地。",
+                                             image_url: "https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?w=800&q=80"
+                                         }
+                                     ];
+                                 }
+                             } else if (departureCity === 'departure-shanghai') {
+                                 // 上海出发2-5小时推荐
+                                 if (prefersBeach) {
+                                     destinations = [
+                                         {
+                                             name: "舟山普陀山",
+                                             country: "中国浙江舟山",
+                                             reason: "高铁2.5小时，海天佛国，四大佛教名山之一。",
+                                             image_url: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&q=80"
+                                         },
+                                         {
+                                             name: "厦门鼓浪屿",
+                                             country: "中国福建厦门",
+                                             reason: "高铁5小时，海上花园，万国建筑博览，文艺小资。",
+                                             image_url: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&q=80"
+                                         },
+                                         {
+                                             name: "青岛栈桥",
+                                             country: "中国山东青岛",
+                                             reason: "高铁4.5小时，北方海滨城市，啤酒文化，海鲜美食。",
+                                             image_url: "https://images.unsplash.com/photo-1565992441121-4367c2967103?w=800&q=80"
+                                         },
+                                         {
+                                             name: "连云港花果山",
+                                             country: "中国江苏连云港",
+                                             reason: "高铁2.5小时，孙悟空老家，花果山水帘洞，西游记文化。",
+                                             image_url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80"
+                                         }
+                                     ];
+                                 } else if (prefersMountain) {
+                                     destinations = [
+                                         {
+                                             name: "黄山迎客松",
+                                             country: "中国安徽黄山",
+                                             reason: "高铁3小时，中国最美山岳之一，奇松怪石，云海日出。",
+                                             image_url: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80"
+                                         },
+                                         {
+                                             name: "三清山",
+                                             country: "中国江西上饶",
+                                             reason: "高铁2.5小时，世界自然遗产，道教名山，绝美云海。",
+                                             image_url: "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=800&q=80"
+                                         },
+                                         {
+                                             name: "庐山",
+                                             country: "中国江西九江",
+                                             reason: "高铁4小时，避暑胜地，三叠泉瀑布，庐山会议旧址。",
+                                             image_url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+                                         },
+                                         {
+                                             name: "雁荡山",
+                                             country: "中国浙江温州",
+                                             reason: "高铁3.5小时，东南第一山，奇峰怪石，灵峰夜景。",
+                                             image_url: "https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&q=80"
+                                         }
+                                     ];
+                                 } else if (prefersCulture) {
+                                     destinations = [
+                                         {
+                                             name: "苏州拙政园",
+                                             country: "中国江苏苏州",
+                                             reason: "高铁30分钟，中国四大名园之首，江南园林典范。",
+                                             image_url: "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=800&q=80"
+                                         },
+                                         {
+                                             name: "南京夫子庙",
+                                             country: "中国江苏南京",
+                                             reason: "高铁1.5小时，六朝古都文化中心，秦淮河畔。",
+                                             image_url: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80"
+                                         },
+                                         {
+                                             name: "绍兴鲁迅故里",
+                                             country: "中国浙江绍兴",
+                                             reason: "高铁1.5小时，鲁迅故居，三味书屋，百草园。",
+                                             image_url: "https://images.unsplash.com/photo-1508804052814-cd3ba865a116?w=800&q=80"
+                                         },
+                                         {
+                                             name: "扬州瘦西湖",
+                                             country: "中国江苏扬州",
+                                             reason: "高铁2小时，烟花三月下扬州，江南园林，二十四桥。",
+                                             image_url: "https://images.unsplash.com/photo-1584952811565-c90e3d7d4a39?w=800&q=80"
+                                         }
+                                     ];
+                                 } else {
+                                     destinations = [
+                                         {
+                                             name: "苏州拙政园",
+                                             country: "中国江苏苏州",
+                                             reason: "高铁30分钟，中国四大名园之首，江南园林典范。",
+                                             image_url: "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=800&q=80"
+                                         },
+                                         {
+                                             name: "杭州西湖",
+                                             country: "中国浙江杭州",
+                                             reason: "高铁1小时，西湖十景，诗情画意，江南美景。",
+                                             image_url: "https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&q=80"
+                                         },
+                                         {
+                                             name: "南京夫子庙",
+                                             country: "中国江苏南京",
+                                             reason: "高铁1.5小时，六朝古都文化中心，秦淮河畔。",
+                                             image_url: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80"
+                                         },
+                                         {
+                                             name: "黄山迎客松",
+                                             country: "中国安徽黄山",
+                                             reason: "高铁3小时，中国最美山岳之一，奇松怪石，云海日出。",
+                                             image_url: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80"
+                                         }
+                                     ];
+                                 }
+                             } else if (departureCity === 'departure-guangzhou') {
+                                 // 广州出发2-5小时推荐
+                                 if (prefersBeach) {
+                                     destinations = [
+                                         {
+                                             name: "厦门鼓浪屿",
+                                             country: "中国福建厦门",
+                                             reason: "高铁3小时，海上花园，万国建筑博览，文艺小资。",
+                                             image_url: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&q=80"
+                                         },
+                                         {
+                                             name: "北海银滩",
+                                             country: "中国广西北海",
+                                             reason: "高铁4.5小时，天下第一滩，十里银沙，海滨度假。",
+                                             image_url: "https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?w=800&q=80"
+                                         },
+                                         {
+                                             name: "阳江海陵岛",
+                                             country: "中国广东阳江",
+                                             reason: "高铁3.5小时，南方北戴河，十里银滩，海鲜美食。",
+                                             image_url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80"
+                                         },
+                                         {
+                                             name: "惠州巽寮湾",
+                                             country: "中国广东惠州",
+                                             reason: "高铁1.5小时，广东马尔代夫，水清沙白，度假胜地。",
+                                             image_url: "https://images.unsplash.com/photo-1565992441121-4367c2967103?w=800&q=80"
+                                         }
+                                     ];
+                                 } else if (prefersMountain) {
+                                     destinations = [
+                                         {
+                                             name: "桂林漓江",
+                                             country: "中国广西桂林",
+                                             reason: "高铁3小时，山水甲天下，竹筏漂流，诗意山水。",
+                                             image_url: "https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&q=80"
+                                         },
+                                         {
+                                             name: "张家界天门山",
+                                             country: "中国湖南张家界",
+                                             reason: "高铁5小时，世界最长玻璃栈道，俯瞰万丈深渊。",
+                                             image_url: "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=800&q=80"
+                                         },
+                                         {
+                                             name: "衡山",
+                                             country: "中国湖南衡阳",
+                                             reason: "高铁3.5小时，五岳独秀，祝融峰日出，佛教圣地。",
+                                             image_url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+                                         },
+                                         {
+                                             name: "丹霞山",
+                                             country: "中国广东韶关",
+                                             reason: "高铁1.5小时，世界自然遗产，丹霞地貌，红石公园。",
+                                             image_url: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80"
+                                         }
+                                     ];
+                                 } else if (prefersCulture) {
+                                     destinations = [
+                                         {
+                                             name: "武汉黄鹤楼",
+                                             country: "中国湖北武汉",
+                                             reason: "高铁4小时，天下江山第一楼，长江大桥，荆楚文化。",
+                                             image_url: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80"
+                                         },
+                                         {
+                                             name: "长沙岳麓书院",
+                                             country: "中国湖南长沙",
+                                             reason: "高铁3.5小时，千年学府，岳麓山，湘江风光。",
+                                             image_url: "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=800&q=80"
+                                         },
+                                         {
+                                             name: "桂林象鼻山",
+                                             country: "中国广西桂林",
+                                             reason: "高铁3小时，桂林城徽，漓江精华段，山水甲天下。",
+                                             image_url: "https://images.unsplash.com/photo-1508804052814-cd3ba865a116?w=800&q=80"
+                                         },
+                                         {
+                                             name: "广州陈家祠",
+                                             country: "中国广东广州",
+                                             reason: "高铁30分钟，岭南建筑瑰宝，民间工艺博物馆。",
+                                             image_url: "https://images.unsplash.com/photo-1584952811565-c90e3d7d4a39?w=800&q=80"
+                                         }
+                                     ];
+                                 } else {
+                                     destinations = [
+                                         {
+                                             name: "广州长隆野生动物世界",
+                                             country: "中国广东广州",
+                                             reason: "高铁30分钟，国内顶级野生动物园，亲子游首选。",
+                                             image_url: "https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?w=800&q=80"
+                                         },
+                                         {
+                                             name: "厦门鼓浪屿",
+                                             country: "中国福建厦门",
+                                             reason: "高铁3小时，海上花园，万国建筑博览，文艺小资。",
+                                             image_url: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&q=80"
+                                         },
+                                         {
+                                             name: "长沙橘子洲头",
+                                             country: "中国湖南长沙",
+                                             reason: "高铁3.5小时，湘江中心，青年毛泽东雕像，红色旅游。",
+                                             image_url: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80"
+                                         },
+                                         {
+                                             name: "武汉黄鹤楼",
+                                             country: "中国湖北武汉",
+                                             reason: "高铁4小时，天下江山第一楼，长江大桥，荆楚文化。",
+                                             image_url: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80"
+                                         }
+                                     ];
+                                 }
+                             } else if (departureCity === 'departure-chengdu') {
+                                 // 成都出发2-5小时推荐
+                                 if (prefersBeach) {
+                                     destinations = [
+                                         {
+                                             name: "重庆洪崖洞",
+                                             country: "中国重庆",
+                                             reason: "高铁1.5小时，现实版千与千寻，吊脚楼建筑群，夜景璀璨。",
+                                             image_url: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=800&q=80"
+                                         },
+                                         {
+                                             name: "昆明滇池",
+                                             country: "中国云南昆明",
+                                             reason: "高铁6小时，春城，高原明珠，海埂大坝，红嘴鸥。",
+                                             image_url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80"
+                                         },
+                                         {
+                                             name: "贵阳花溪公园",
+                                             country: "中国贵州贵阳",
+                                             reason: "高铁3.5小时，高原明珠，花溪夜郎谷，青岩古镇。",
+                                             image_url: "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=800&q=80"
+                                         },
+                                         {
+                                             name: "西昌邛海",
+                                             country: "中国四川西昌",
+                                             reason: "高铁4.5小时，高原明珠，月城，邛海湿地公园。",
+                                             image_url: "https://images.unsplash.com/photo-1565992441121-4367c2967103?w=800&q=80"
+                                         }
+                                     ];
+                                 } else if (prefersMountain) {
+                                     destinations = [
+                                         {
+                                             name: "峨眉山金顶",
+                                             country: "中国四川峨眉山",
+                                             reason: "高铁1.5小时，中国四大佛教名山，金顶日出云海，佛光普照。",
+                                             image_url: "https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&q=80"
+                                         },
+                                         {
+                                             name: "九寨沟",
+                                             country: "中国四川九寨沟",
+                                             reason: "高铁2小时，童话世界，彩池瀑布，自然风光绝美。",
+                                             image_url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+                                         },
+                                         {
+                                             name: "黄龙",
+                                             country: "中国四川松潘",
+                                             reason: "高铁2.5小时，人间瑶池，五彩池，钙化池群。",
+                                             image_url: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80"
+                                         },
+                                         {
+                                             name: "四姑娘山",
+                                             country: "中国四川小金",
+                                             reason: "高铁3小时，东方阿尔卑斯，双桥沟，长坪沟。",
+                                             image_url: "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=800&q=80"
+                                         }
+                                     ];
+                                 } else if (prefersCulture) {
+                                     destinations = [
+                                         {
+                                             name: "都江堰水利工程",
+                                             country: "中国四川都江堰",
+                                             reason: "高铁30分钟，世界文化遗产，千年水利工程奇迹。",
+                                             image_url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+                                         },
+                                         {
+                                             name: "乐山大佛",
+                                             country: "中国四川乐山",
+                                             reason: "高铁1小时，世界最大石刻佛像，三江汇流壮观。",
+                                             image_url: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80"
+                                         },
+                                         {
+                                             name: "重庆大足石刻",
+                                             country: "中国重庆大足",
+                                             reason: "高铁1.5小时，世界文化遗产，石窟艺术，佛教文化。",
+                                             image_url: "https://images.unsplash.com/photo-1508804052814-cd3ba865a116?w=800&q=80"
+                                         },
+                                         {
+                                             name: "西安兵马俑",
+                                             country: "中国陕西西安",
+                                             reason: "高铁4小时，世界第八大奇迹，秦始皇陵陪葬坑。",
+                                             image_url: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80"
+                                         }
+                                     ];
+                                 } else {
+                                     destinations = [
+                                         {
+                                             name: "青城山",
+                                             country: "中国四川都江堰",
+                                             reason: "高铁30分钟，道教名山，青城天下幽，避暑胜地。",
+                                             image_url: "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=800&q=80"
+                                         },
+                                         {
+                                             name: "乐山大佛",
+                                             country: "中国四川乐山",
+                                             reason: "高铁1小时，世界最大石刻佛像，三江汇流壮观。",
+                                             image_url: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80"
+                                         },
+                                         {
+                                             name: "重庆洪崖洞",
+                                             country: "中国重庆",
+                                             reason: "高铁1.5小时，现实版千与千寻，吊脚楼建筑群，夜景璀璨。",
+                                             image_url: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=800&q=80"
+                                         },
+                                         {
+                                             name: "九寨沟",
+                                             country: "中国四川九寨沟",
+                                             reason: "高铁2小时，童话世界，彩池瀑布，自然风光绝美。",
+                                             image_url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+                                         }
+                                     ];
+                                 }
+                             }
+                         } else {
+                             // 默认中长途推荐
+                             if (prefersBeach) {
+                                     destinations = [
+                                         {
+                                             name: "青岛栈桥",
+                                             country: "中国山东青岛",
+                                             reason: "北方海滨城市，啤酒文化，海鲜美食。",
+                                             image_url: "https://images.unsplash.com/photo-1565992441121-4367c2967103?w=800&q=80"
+                                         },
+                                         {
+                                             name: "厦门鼓浪屿日光岩",
+                                             country: "中国福建厦门",
+                                             reason: "海岛风情，文艺小资，适合慢节奏旅行。",
+                                             image_url: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&q=80"
+                                         },
+                                         {
+                                             name: "大连金石滩",
+                                             country: "中国辽宁大连",
+                                             reason: "北方最美海滩，奇石海岸，地质奇观。",
+                                             image_url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80"
+                                         },
+                                         {
+                                             name: "威海刘公岛",
+                                             country: "中国山东威海",
+                                             reason: "甲午海战纪念地，海岛风光，历史教育。",
+                                             image_url: "https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?w=800&q=80"
+                                         }
+                                     ];
+                                 } else if (prefersMountain) {
+                                     destinations = [
+                                         {
+                                             name: "黄山迎客松",
+                                             country: "中国安徽黄山",
+                                             reason: "中国最美山岳之一，奇松怪石，云海日出。",
+                                             image_url: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80"
+                                         },
+                                         {
+                                             name: "张家界天门山玻璃栈道",
+                                             country: "中国湖南张家界",
+                                             reason: "世界最长玻璃栈道，俯瞰万丈深渊，刺激与美景。",
+                                             image_url: "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=800&q=80"
+                                         },
+                                         {
+                                             name: "峨眉山金顶",
+                                             country: "中国四川峨眉山",
+                                             reason: "中国四大佛教名山，金顶日出云海，佛光普照。",
+                                             image_url: "https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&q=80"
+                                         },
+                                         {
+                                             name: "泰山玉皇顶",
+                                             country: "中国山东泰安",
+                                             reason: "五岳之首，登泰山而小天下，日出云海壮观。",
+                                             image_url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+                                         }
+                                     ];
+                                 } else if (prefersCulture) {
+                                     destinations = [
+                                         {
+                                             name: "西安兵马俑一号坑",
+                                             country: "中国陕西西安",
+                                             reason: "世界第八大奇迹，秦始皇陵陪葬坑，感受秦朝军阵震撼。",
+                                             image_url: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80"
+                                         },
+                                         {
+                                             name: "故宫太和殿",
+                                             country: "中国北京",
+                                             reason: "紫禁城核心建筑，明清两朝皇帝登基大典之地。",
+                                             image_url: "https://images.unsplash.com/photo-1584952811565-c90e3d7d4a39?w=800&q=80"
+                                         },
+                                         {
+                                             name: "南京夫子庙",
+                                             country: "中国江苏南京",
+                                             reason: "六朝古都文化中心，秦淮河畔，历史与现代交融。",
+                                             image_url: "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=800&q=80"
+                                         },
+                                         {
+                                             name: "洛阳龙门石窟",
+                                             country: "中国河南洛阳",
+                                             reason: "中国四大石窟之一，千年石刻艺术宝库。",
+                                             image_url: "https://images.unsplash.com/photo-1508804052814-cd3ba865a116?w=800&q=80"
+                                         }
+                                     ];
+                                 } else {
+                                     destinations = [
+                                         {
+                                             name: "成都大熊猫繁育研究基地",
+                                             country: "中国四川成都",
+                                             reason: "近距离观赏国宝大熊猫，了解熊猫生活习性。",
+                                             image_url: "https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?w=800&q=80"
+                                         },
+                                         {
+                                             name: "杭州西湖断桥残雪",
+                                             country: "中国浙江杭州",
+                                             reason: "西湖十景之一，白娘子传说发源地，诗意江南。",
+                                             image_url: "https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&q=80"
+                                         },
+                                         {
+                                             name: "重庆洪崖洞",
+                                             country: "中国重庆",
+                                             reason: "现实版千与千寻，吊脚楼建筑群，夜景璀璨。",
+                                             image_url: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=800&q=80"
+                                         },
+                                         {
+                                             name: "大理洱海双廊",
+                                             country: "中国云南大理",
+                                             reason: "洱海最美小镇，苍山洱海相伴，文艺慢生活。",
+                                             image_url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+                                         }
+                                     ];
+                                }
+                            }
+                            if (!domesticOnly) {
+                                // 可以考虑国际目的地
+                                 if (prefersBeach) {
+                                     destinations = [
+                                         {
+                                             name: "巴厘岛海神庙",
+                                             country: "印度尼西亚巴厘岛",
+                                             reason: "建在岩石上的古老寺庙，涨潮时与世隔绝，日落最美。",
+                                             image_url: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&q=80"
+                                         },
+                                         {
+                                             name: "普吉岛皮皮岛",
+                                             country: "泰国普吉岛",
+                                             reason: "泰国最美海岛，玛雅湾电影取景地，碧海白沙。",
+                                             image_url: "https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?w=800&q=80"
+                                         },
+                                         {
+                                             name: "济州岛汉拿山",
+                                             country: "韩国济州岛",
+                                             reason: "韩国最高峰，火山地貌，海滨风光，免签便利。",
+                                             image_url: "https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?w=800&q=80"
+                                         },
+                                         {
+                                             name: "冲绳美丽海水族馆",
+                                             country: "日本冲绳",
+                                             reason: "世界最大水族馆之一，鲸鲨表演，热带海岛风情。",
+                                             image_url: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&q=80"
+                                         }
+                                     ];
+                                 } else if (prefersMountain) {
+                                     destinations = [
+                                         {
+                                             name: "富士山",
+                                             country: "日本",
+                                             reason: "日本最高峰，世界文化遗产，樱花季节最美。",
+                                             image_url: "https://images.unsplash.com/photo-1490806843957-31f4c9a91c65?w=800&q=80"
+                                         },
+                                         {
+                                             name: "济州岛城山日出峰",
+                                             country: "韩国济州岛",
+                                             reason: "火山口形成的山峰，日出观赏胜地，海景壮丽。",
+                                             image_url: "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=800&q=80"
+                                         },
+                                         {
+                                             name: "长白山天池",
+                                             country: "中国吉林",
+                                             reason: "中朝边境火山湖，一年四季景色各异，神秘美丽。",
+                                             image_url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+                                         },
+                                         {
+                                             name: "玉龙雪山",
+                                             country: "中国云南丽江",
+                                             reason: "北半球最近赤道的雪山，冰川公园，蓝月谷绝美。",
+                                             image_url: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80"
+                                         }
+                            ];
+                        } else if (prefersCulture) {
+                            destinations = [
+                                {
+                                    name: "京都清水寺",
+                                    country: "日本京都",
+                                    reason: "京都最古老寺院，木质舞台悬空而建，樱花红叶季节绝美。",
+                                    image_url: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&q=80"
+                                },
+                                {
+                                    name: "首尔景福宫",
+                                    country: "韩国首尔",
+                                    reason: "朝鲜王朝皇宫，传统韩式建筑，守门换岗仪式精彩。",
+                                    image_url: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800&q=80"
+                                },
+                                {
+                                    name: "曼谷大皇宫",
+                                    country: "泰国曼谷",
+                                    reason: "泰国最宏伟的宫殿群，金碧辉煌，佛教文化中心。",
+                                    image_url: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80"
+                                },
+                                {
+                                    name: "新加坡滨海湾花园",
+                                    country: "新加坡",
+                                    reason: "未来感花园城市，超级树灯光秀，现代建筑奇迹。",
+                                    image_url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80"
+                                }
+                            ];
+                        } else {
+                            destinations = [
+                                {
+                                    name: "东京浅草寺",
+                                    country: "日本东京",
+                                    reason: "东京最古老寺庙，雷门大灯笼，传统江户风情。",
+                                    image_url: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&q=80"
+                                },
+                                {
+                                    name: "首尔明洞",
+                                    country: "韩国首尔",
+                                    reason: "购物天堂，美食聚集地，现代都市风情。",
+                                    image_url: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=800&q=80"
+                                },
+                                {
+                                    name: "新加坡圣淘沙",
+                                    country: "新加坡",
+                                    reason: "度假胜地，环球影城，海滩娱乐，适合全家。",
+                                    image_url: "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?w=800&q=80"
+                                },
+                                {
+                                    name: "香港维多利亚港",
+                                    country: "中国香港",
+                                    reason: "世界三大天然良港之一，夜景璀璨，购物美食天堂。",
+                                    image_url: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80"
+                                }
+                            ];
+                        }
+                    }
+                }
+                // 如果用户接受长途（5-10小时）
+                else if (timePreference === 'time-long') {
+                    if (domesticOnly) {
+                        if (prefersBeach) {
+                            destinations = [
+                                {
+                                    name: "亚龙湾热带天堂森林公园",
+                                    country: "中国海南三亚",
+                                    reason: "国内最美海滩，热带雨林与海滩完美结合。",
+                                    image_url: "https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?w=800&q=80"
+                                },
+                                {
+                                    name: "鼓浪屿日光岩",
+                                    country: "中国福建厦门",
+                                    reason: "厦门最高点，俯瞰全岛和鼓浪屿全景。",
+                                    image_url: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&q=80"
+                                },
+                                {
+                                    name: "青岛栈桥",
+                                    country: "中国山东青岛",
+                                    reason: "青岛标志性景点，延伸入海的栈道，海鸥飞舞。",
+                                    image_url: "https://images.unsplash.com/photo-1565992441121-4367c2967103?w=800&q=80"
+                                },
+                                {
+                                    name: "大连金石滩",
+                                    country: "中国辽宁大连",
+                                    reason: "北方最美海滩，奇石海岸，地质奇观。",
+                                    image_url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80"
+                                }
+                            ];
+                        } else if (prefersMountain) {
+                            destinations = [
+                                {
+                                    name: "张家界天门山玻璃栈道",
+                                    country: "中国湖南张家界",
+                                    reason: "世界最长玻璃栈道，俯瞰万丈深渊，刺激与美景。",
+                                    image_url: "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=800&q=80"
+                                },
+                                {
+                                    name: "九寨沟五花海",
+                                    country: "中国四川九寨沟",
+                                    reason: "九寨沟最美湖泊，湖水五彩斑斓，如梦如幻。",
+                                    image_url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+                                },
+                                {
+                                    name: "黄山迎客松",
+                                    country: "中国安徽黄山",
+                                    reason: "黄山标志性景观，千年古松，云海日出。",
+                                    image_url: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80"
+                                },
+                                {
+                                    name: "桂林象鼻山",
+                                    country: "中国广西桂林",
+                                    reason: "桂林城徽，漓江精华段，山水甲天下。",
+                                    image_url: "https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&q=80"
+                                }
+                            ];
+                        } else if (prefersCulture) {
+                            destinations = [
+                                {
+                                    name: "兵马俑一号坑",
+                                    country: "中国陕西西安",
+                                    reason: "世界第八大奇迹，秦始皇陵陪葬坑，震撼军阵。",
+                                    image_url: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80"
+                                },
+                                {
+                                    name: "故宫太和殿",
+                                    country: "中国北京",
+                                    reason: "紫禁城核心建筑，明清两朝皇帝登基大典之地。",
+                                    image_url: "https://images.unsplash.com/photo-1584952811565-c90e3d7d4a39?w=800&q=80"
+                                },
+                                {
+                                    name: "拙政园",
+                                    country: "中国江苏苏州",
+                                    reason: "中国四大名园之首，江南园林典范，一步一景。",
+                                    image_url: "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=800&q=80"
+                                },
+                                {
+                                    name: "丽江四方街",
+                                    country: "中国云南丽江",
+                                    reason: "丽江古城中心，纳西族文化发源地，小桥流水。",
+                                    image_url: "https://images.unsplash.com/photo-1508804052814-cd3ba865a116?w=800&q=80"
+                                }
+                            ];
+                        } else {
+                            destinations = [
+                                {
+                                    name: "成都大熊猫繁育研究基地",
+                                    country: "中国四川成都",
+                                    reason: "近距离观赏国宝大熊猫，了解熊猫生活习性。",
+                                    image_url: "https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?w=800&q=80"
+                                },
+                                {
+                                    name: "西湖断桥残雪",
+                                    country: "中国浙江杭州",
+                                    reason: "西湖十景之一，白娘子传说发源地，诗意江南。",
+                                    image_url: "https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&q=80"
+                                },
+                                {
+                                    name: "洪崖洞",
+                                    country: "中国重庆",
+                                    reason: "现实版千与千寻，吊脚楼建筑群，夜景璀璨。",
+                                    image_url: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=800&q=80"
+                                },
+                                {
+                                    name: "洱海双廊",
+                                    country: "中国云南大理",
+                                    reason: "洱海最美小镇，苍山洱海相伴，文艺慢生活。",
+                                    image_url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+                                }
+                            ];
+                        }
+                    } else {
+                        // 可以考虑国际目的地
+                        if (prefersBeach) {
+                            destinations = [
+                                {
+                                    name: "马尔代夫水上屋",
+                                    country: "马尔代夫",
+                                    reason: "世界顶级水上屋体验，透明地板看海鱼，日出日落。",
+                                    image_url: "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=800&q=80"
+                                },
+                                {
+                                    name: "巴厘岛海神庙",
+                                    country: "印度尼西亚巴厘岛",
+                                    reason: "建在岩石上的古老寺庙，涨潮时与世隔绝，日落最美。",
+                                    image_url: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&q=80"
+                                },
+                                {
+                                    name: "普吉岛皮皮岛",
+                                    country: "泰国普吉岛",
+                                    reason: "泰国最美海岛，玛雅湾电影取景地，碧海白沙。",
+                                    image_url: "https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?w=800&q=80"
+                                },
+                                {
+                                    name: "夏威夷威基基海滩",
+                                    country: "美国夏威夷",
+                                    reason: "世界著名海滩，钻石山背景，冲浪天堂。",
+                                    image_url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80"
+                                }
+                            ];
+                        } else if (prefersMountain) {
+                            destinations = [
+                                {
+                                    name: "瑞士马特洪峰",
+                                    country: "瑞士阿尔卑斯",
+                                    reason: "阿尔卑斯山最标志性山峰，金字塔形状，登山者圣地。",
+                                    image_url: "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800&q=80"
+                                },
+                                {
+                                    name: "新西兰米尔福德峡湾",
+                                    country: "新西兰南岛",
+                                    reason: "世界第八大奇迹，瀑布从千米高空直泻而下，壮丽无比。",
+                                    image_url: "https://images.unsplash.com/photo-1507699622107-9be8627a8698?w=800&q=80"
+                                },
+                                {
+                                    name: "冰岛蓝湖温泉",
+                                    country: "冰岛雷克雅未克",
+                                    reason: "世界著名地热温泉，乳蓝色湖水，黑色火山岩环绕。",
+                                    image_url: "https://images.unsplash.com/photo-1476610182048-b716b8518aae?w=800&q=80"
+                                },
+                                {
+                                    name: "挪威盖朗厄尔峡湾",
+                                    country: "挪威西部",
+                                    reason: "联合国世界遗产，七姐妹瀑布，两岸悬崖峭壁。",
+                                    image_url: "https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=800&q=80"
+                                }
+                            ];
+                        } else if (prefersCulture) {
+                            destinations = [
+                                {
+                                    name: "京都清水寺",
+                                    country: "日本京都",
+                                    reason: "京都最古老寺院，木质舞台悬空而建，樱花红叶季节绝美。",
+                                    image_url: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&q=80"
+                                },
+                                {
+                                    name: "罗马斗兽场",
+                                    country: "意大利罗马",
+                                    reason: "古罗马帝国象征，世界新七大奇迹之一，感受两千年辉煌。",
+                                    image_url: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800&q=80"
+                                },
+                                {
+                                    name: "巴黎卢浮宫",
+                                    country: "法国巴黎",
+                                    reason: "世界最大艺术博物馆，蒙娜丽莎真迹，艺术朝圣之地。",
+                                    image_url: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80"
+                                },
+                                {
+                                    name: "吉萨金字塔群",
+                                    country: "埃及开罗",
+                                    reason: "世界七大奇迹仅存者，胡夫金字塔，狮身人面像。",
+                                    image_url: "https://images.unsplash.com/photo-1572252009286-268acec5ca0a?w=800&q=80"
+                                }
+                            ];
+                        } else {
+                            destinations = [
+                                {
+                                    name: "伦敦大本钟",
+                                    country: "英国伦敦",
+                                    reason: "伦敦标志性建筑，伊丽莎白塔，哥特式建筑典范。",
+                                    image_url: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800&q=80"
+                                },
+                                {
+                                    name: "纽约时代广场",
+                                    country: "美国纽约",
+                                    reason: "世界的十字路口，霓虹灯璀璨，百老汇剧院。",
+                                    image_url: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=800&q=80"
+                                },
+                                {
+                                    name: "悉尼歌剧院",
+                                    country: "澳大利亚悉尼",
+                                    reason: "20世纪最具标志性建筑之一，帆船造型，海港大桥相伴。",
+                                    image_url: "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?w=800&q=80"
+                                },
+                                {
+                                    name: "迪拜哈利法塔",
+                                    country: "阿联酋迪拜",
+                                    reason: "世界最高建筑，828米，俯瞰整个迪拜，现代工程奇迹。",
+                                    image_url: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&q=80"
+                                }
+                            ];
+                        }
+                    }
+                }
+                // 如果用户接受超长途（10小时以上）
+                else if (timePreference === 'time-verylong') {
+                    if (internationalOnly) {
+                        if (prefersBeach) {
+                            destinations = [
+                                {
+                                    name: "马尔代夫水上屋",
+                                    country: "马尔代夫",
+                                    reason: "世界顶级水上屋体验，透明地板看海鱼，日出日落。",
+                                    image_url: "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=800&q=80"
+                                },
+                                {
+                                    name: "夏威夷威基基海滩",
+                                    country: "美国夏威夷",
+                                    reason: "世界著名海滩，钻石山背景，冲浪天堂。",
+                                    image_url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80"
+                                },
+                                {
+                                    name: "大堡礁",
+                                    country: "澳大利亚",
+                                    reason: "世界最大珊瑚礁群，潜水天堂，海洋生物丰富。",
+                                    image_url: "https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?w=800&q=80"
+                                },
+                                {
+                                    name: "塞舌尔",
+                                    country: "塞舌尔",
+                                    reason: "印度洋珍珠，原始海滩，巨龟栖息地，蜜月圣地。",
+                                    image_url: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&q=80"
+                                }
+                            ];
+                        } else if (prefersMountain) {
+                            destinations = [
+                                {
+                                    name: "瑞士马特洪峰",
+                                    country: "瑞士阿尔卑斯",
+                                    reason: "阿尔卑斯山最标志性山峰，金字塔形状，登山者圣地。",
+                                    image_url: "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800&q=80"
+                                },
+                                {
+                                    name: "新西兰米尔福德峡湾",
+                                    country: "新西兰南岛",
+                                    reason: "世界第八大奇迹，瀑布从千米高空直泻而下，壮丽无比。",
+                                    image_url: "https://images.unsplash.com/photo-1507699622107-9be8627a8698?w=800&q=80"
+                                },
+                                {
+                                    name: "冰岛蓝湖温泉",
+                                    country: "冰岛雷克雅未克",
+                                    reason: "世界著名地热温泉，乳蓝色湖水，黑色火山岩环绕。",
+                                    image_url: "https://images.unsplash.com/photo-1476610182048-b716b8518aae?w=800&q=80"
+                                },
+                                {
+                                    name: "挪威盖朗厄尔峡湾",
+                                    country: "挪威西部",
+                                    reason: "联合国世界遗产，七姐妹瀑布，两岸悬崖峭壁。",
+                                    image_url: "https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=800&q=80"
+                                }
+                            ];
+                        } else if (prefersCulture) {
+                            destinations = [
+                                {
+                                    name: "罗马斗兽场",
+                                    country: "意大利罗马",
+                                    reason: "古罗马帝国象征，世界新七大奇迹之一，感受两千年辉煌。",
+                                    image_url: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800&q=80"
+                                },
+                                {
+                                    name: "巴黎卢浮宫",
+                                    country: "法国巴黎",
+                                    reason: "世界最大艺术博物馆，蒙娜丽莎真迹，艺术朝圣之地。",
+                                    image_url: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80"
+                                },
+                                {
+                                    name: "吉萨金字塔群",
+                                    country: "埃及开罗",
+                                    reason: "世界七大奇迹仅存者，胡夫金字塔，狮身人面像。",
+                                    image_url: "https://images.unsplash.com/photo-1572252009286-268acec5ca0a?w=800&q=80"
+                                },
+                                {
+                                    name: "雅典卫城",
+                                    country: "希腊雅典",
+                                    reason: "西方文明的摇篮，帕特农神庙，古希腊建筑巅峰。",
+                                    image_url: "https://images.unsplash.com/photo-1555993539-1732b0258235?w=800&q=80"
+                                }
+                            ];
+                        } else {
+                            destinations = [
+                                {
+                                    name: "纽约时代广场",
+                                    country: "美国纽约",
+                                    reason: "世界的十字路口，霓虹灯璀璨，百老汇剧院。",
+                                    image_url: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=800&q=80"
+                                },
+                                {
+                                    name: "伦敦大本钟",
+                                    country: "英国伦敦",
+                                    reason: "伦敦标志性建筑，伊丽莎白塔，哥特式建筑典范。",
+                                    image_url: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800&q=80"
+                                },
+                                {
+                                    name: "悉尼歌剧院",
+                                    country: "澳大利亚悉尼",
+                                    reason: "20世纪最具标志性建筑之一，帆船造型，海港大桥相伴。",
+                                    image_url: "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?w=800&q=80"
+                                },
+                                {
+                                    name: "迪拜哈利法塔",
+                                    country: "阿联酋迪拜",
+                                    reason: "世界最高建筑，828米，俯瞰整个迪拜，现代工程奇迹。",
+                                    image_url: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&q=80"
+                                }
+                            ];
+                        }
+                    } else {
+                        // 国内和国际都可以
+                        destinations = [
+                            {
+                                name: "巴黎埃菲尔铁塔",
+                                country: "法国巴黎",
+                                reason: "世界著名地标，浪漫之都象征，日落时分最美。",
+                                image_url: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80"
+                            },
+                            {
+                                name: "东京浅草寺",
+                                country: "日本东京",
+                                reason: "东京最古老寺庙，雷门大灯笼，传统江户风情。",
+                                image_url: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&q=80"
+                            },
+                            {
+                                name: "纽约自由女神像",
+                                country: "美国纽约",
+                                reason: "自由与民主象征，自由岛，纽约港标志性景观。",
+                                image_url: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=800&q=80"
+                            },
+                            {
+                                name: "悉尼海港大桥",
+                                country: "澳大利亚悉尼",
+                                reason: "世界最大钢拱桥，可攀登至顶端，与歌剧院相映成趣。",
+                                image_url: "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?w=800&q=80"
+                            }
+                        ];
+                    }
+                }
+
+                // 根据预算调整推荐
+                if (prefersBudget) {
+                    destinations = destinations.map(dest => ({
+                        ...dest,
+                        reason: dest.reason + " 性价比高，适合预算旅行。"
+                    }));
+                } else if (prefersLuxury) {
+                    destinations = destinations.map(dest => ({
+                        ...dest,
+                        reason: dest.reason + " 提供奢华体验，适合高端旅行。"
+                    }));
+                }
+
+                // 生成人格分析
+                let personaTitle = "";
+                let personaEmoji = "";
+                let analysis = "";
+
+                if (prefersAdventure && prefersMountain) {
+                    personaTitle = "山野探险家";
+                    personaEmoji = "🏔️";
+                    if (timePreference === 'time-short') {
+                        analysis = "你是一个热爱自然、追求挑战的探险家。虽然时间有限，但你依然能在周边找到刺激的户外体验，享受周末的冒险时光。";
+                    } else if (domesticOnly) {
+                        analysis = "你是一个热爱自然、追求挑战的探险家。你喜欢探索国内的壮丽山川，通过户外活动获得成就感和满足。";
+                    } else {
+                        analysis = "你是一个热爱自然、追求挑战的探险家。你喜欢壮丽的山川湖海，享受户外活动带来的刺激和成就感，愿意为美景远行。";
+                    }
+                } else if (prefersCulture && prefersHistory) {
+                    personaTitle = "文化追寻者";
+                    personaEmoji = "🎭";
+                    if (timePreference === 'time-short') {
+                        analysis = "你是一个对历史文化充满热情的追寻者。即使时间短暂，你也会选择周边的历史文化景点，在周末充实自己。";
+                    } else if (domesticOnly) {
+                        analysis = "你是一个对历史文化充满热情的追寻者。你喜欢深入了解中华文明的精髓，通过旅行丰富自己的知识和视野。";
+                    } else {
+                        analysis = "你是一个对历史文化充满热情的追寻者。你喜欢深入了解不同文明的精髓，通过旅行丰富自己的知识和视野，探索世界文化。";
+                    }
+                } else if (prefersBeach && prefersRelax) {
+                    personaTitle = "海岛度假者";
+                    personaEmoji = "🏖️";
+                    if (timePreference === 'time-short') {
+                        analysis = "你是一个懂得享受生活的度假者。即使时间有限，你也会选择周边的水域放松身心，寻找内心的平静。";
+                    } else if (domesticOnly) {
+                        analysis = "你是一个懂得享受生活的度假者。你喜欢国内的海滨风光，通过旅行放松身心，寻找内心的平静与舒适。";
+                    } else {
+                        analysis = "你是一个懂得享受生活的度假者。你喜欢阳光沙滩，通过旅行放松身心，寻找内心的平静与舒适，愿意为美景远行。";
+                    }
+                } else if (domesticOnly) {
+                    personaTitle = "本土探索者";
+                    personaEmoji = "🇨🇳";
+                    if (timePreference === 'time-short') {
+                        analysis = "你是一个热爱身边美景的探索者。你喜欢发现周边城市的魅力，支持本地旅游，享受便捷的短途旅行。";
+                    } else {
+                        analysis = "你是一个热爱祖国大好河山的探索者。你喜欢发现国内各地的美景和文化，支持本土旅游发展，深度体验中华文明。";
+                    }
+                } else {
+                    personaTitle = "环球旅行家";
+                    personaEmoji = "🌍";
+                    if (timePreference === 'time-short') {
+                        analysis = "你是一个充满好奇心的旅行者。即使时间有限，你也会探索周边的新鲜事物，保持对世界的好奇心。";
+                    } else {
+                        analysis = "你是一个充满好奇心的环球旅行者。你喜欢探索世界的每一个角落，体验不同的文化和风景，愿意为梦想远行。";
+                    }
+                }
+
+                // 确保返回完整的结果对象
+                // 如果用户选择只在国内游玩，确保默认推荐也是国内景点
+                const defaultDestinations = domesticOnly ? [
+                    {
+                        name: "成都大熊猫繁育研究基地",
+                        country: "中国四川成都",
+                        reason: "近距离观赏国宝大熊猫，了解熊猫生活习性。",
+                        image_url: "https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?w=800&q=80"
+                    },
+                    {
+                        name: "杭州西湖断桥残雪",
+                        country: "中国浙江杭州",
+                        reason: "西湖十景之一，白娘子传说发源地，诗意江南。",
+                        image_url: "https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&q=80"
+                    },
+                    {
+                        name: "重庆洪崖洞",
+                        country: "中国重庆",
+                        reason: "现实版千与千寻，吊脚楼建筑群，夜景璀璨。",
+                        image_url: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=800&q=80"
+                    },
+                    {
+                        name: "大理洱海双廊",
+                        country: "中国云南大理",
+                        reason: "洱海最美小镇，苍山洱海相伴，文艺慢生活。",
+                        image_url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+                    }
+                ] : [
+                    {
+                        name: "巴黎埃菲尔铁塔",
+                        country: "法国巴黎",
+                        reason: "世界著名地标，浪漫之都象征，日落时分最美。",
+                        image_url: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80"
+                    },
+                    {
+                        name: "东京浅草寺",
+                        country: "日本东京",
+                        reason: "东京最古老寺庙，雷门大灯笼，传统江户风情。",
+                        image_url: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&q=80"
+                    },
+                    {
+                        name: "纽约自由女神像",
+                        country: "美国纽约",
+                        reason: "自由与民主象征，自由岛，纽约港标志性景观。",
+                        image_url: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=800&q=80"
+                    },
+                    {
+                        name: "悉尼海港大桥",
+                        country: "澳大利亚悉尼",
+                        reason: "世界最大钢拱桥，可攀登至顶端，与歌剧院相映成趣。",
+                        image_url: "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?w=800&q=80"
+                    }
+                ];
+
+                const isDomestic = (c) => /中国|香港|澳门|台湾/.test(c || '');
+                let finalList = destinations && destinations.length > 0 ? destinations : defaultDestinations;
+                if (domesticOnly) {
+                    finalList = finalList.filter(d => isDomestic(d.country));
+                }
+                if (internationalOnly) {
+                    finalList = finalList.filter(d => !isDomestic(d.country));
+                }
+                if (!finalList.length) {
+                    finalList = defaultDestinations;
+                }
+                return {
+                    persona_title: personaTitle || "旅行爱好者",
+                    persona_emoji: personaEmoji || "🌍",
+                    analysis: analysis || "你热爱旅行，喜欢探索新的地方和文化。",
+                    destinations: finalList
+                };
+            } catch (error) {
+                console.error('分析推荐出错:', error);
+                // 返回默认推荐（优先推荐国内景点）
+                return {
+                    persona_title: "旅行爱好者",
+                    persona_emoji: "🌍",
+                    analysis: "你热爱旅行，喜欢探索新的地方和文化。",
+                    destinations: [
+                        {
+                            name: "成都大熊猫繁育研究基地",
+                            country: "中国四川成都",
+                            reason: "近距离观赏国宝大熊猫，了解熊猫生活习性。",
+                            image_url: "https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?w=800&q=80"
+                        },
+                        {
+                            name: "杭州西湖断桥残雪",
+                            country: "中国浙江杭州",
+                            reason: "西湖十景之一，白娘子传说发源地，诗意江南。",
+                            image_url: "https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&q=80"
+                        },
+                        {
+                            name: "重庆洪崖洞",
+                            country: "中国重庆",
+                            reason: "现实版千与千寻，吊脚楼建筑群，夜景璀璨。",
+                            image_url: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=800&q=80"
+                        },
+                        {
+                            name: "大理洱海双廊",
+                            country: "中国云南大理",
+                            reason: "洱海最美小镇，苍山洱海相伴，文艺慢生活。",
+                            image_url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+                        }
+                    ]
+                };
+            }
+        };
+
+        const analyzeViaApi = async (answers) => {
+            const url = window.VIBE_ANALYZE_URL;
+            if (!url) return null;
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    answers: answers.map(a => ({
+                        question: a.question,
+                        answer: a.answer,
+                        tags: a.tags
+                    }))
+                })
+            });
+            if (!res.ok) throw new Error('API error');
+            return await res.json();
+        };
+
+        const analyzeUnified = async (answers) => {
+            try {
+                if (window.VIBE_ANALYZE_URL) {
+                    const r = await analyzeViaApi(answers);
+                    if (r) return r;
+                }
+            } catch (e) {
+                console.error('远程分析失败，使用本地规则', e);
+            }
+            return analyzeAndRecommend(answers);
+        };
+
+        // 主应用组件
+        const App = () => {
+            const [page, setPage] = React.useState('welcome');
+            const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0);
+            const [userAnswers, setUserAnswers] = React.useState([]);
+            const [result, setResult] = React.useState(null);
+            const [currentImageUrl, setCurrentImageUrl] = React.useState('');
+            const [textInput, setTextInput] = React.useState('');
+            const [selectedOptions, setSelectedOptions] = React.useState([]);
+
+            const currentQuestion = quizQuestions[currentQuestionIndex];
+
+            const handleStartQuiz = () => {
+                setPage('quiz');
+            };
+
+            React.useEffect(() => {
+                if (currentQuestion && page === 'quiz') {
+                    // 设置背景图片，文本输入类型也使用默认背景
+                    setCurrentImageUrl(`https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1920&q=80`);
+                    // 重置已选选项
+                    setSelectedOptions([]);
+                }
+            }, [currentQuestionIndex, page]);
+
+            const handleMultiSelectToggle = (option) => {
+                setSelectedOptions(prev => {
+                    const isSelected = prev.some(opt => opt.id === option.id);
+                    if (isSelected) {
+                        return prev.filter(opt => opt.id !== option.id);
+                    } else {
+                        return [...prev, option];
+                    }
+                });
+            };
+
+            const handleNextQuestion = () => {
+                if (currentQuestion.multiSelect && selectedOptions.length === 0) {
+                    alert('请至少选择一个选项');
+                    return;
+                }
+
+                let newAnswer;
+                if (currentQuestion.multiSelect) {
+                    newAnswer = {
+                        questionId: currentQuestion.id,
+                        optionId: selectedOptions.map(opt => opt.id).join(','),
+                        tags: selectedOptions.flatMap(opt => opt.tags),
+                        question: currentQuestion.question,
+                        answer: selectedOptions.map(opt => opt.text).join(', '),
+                    };
+                } else {
+                    newAnswer = {
+                        questionId: currentQuestion.id,
+                        optionId: selectedOptions[0].id,
+                        tags: selectedOptions[0].tags,
+                        question: currentQuestion.question,
+                        answer: selectedOptions[0].text,
+                    };
+                }
+
+                const updatedAnswers = [...userAnswers, newAnswer];
+                setUserAnswers(updatedAnswers);
+                setSelectedOptions([]);
+
+                if (currentQuestionIndex < quizQuestions.length - 1) {
+                    setCurrentQuestionIndex(currentQuestionIndex + 1);
+                } else {
+                    setPage('loading');
+                    setTimeout(async () => {
+                        try {
+                            const analysisResult = await analyzeUnified(updatedAnswers);
+                            setResult(analysisResult);
+                            setPage('result');
+                        } catch (error) {
+                            console.error('分析出错:', error);
+                            setResult(analyzeAndRecommend(updatedAnswers));
+                            setPage('result');
+                        }
+                    }, 1200);
+                }
+            };
+
+            const handlePreviousQuestion = () => {
+                if (currentQuestionIndex > 0) {
+                    const updatedAnswers = userAnswers.filter(answer => answer.questionId !== currentQuestion.id);
+                    setUserAnswers(updatedAnswers);
+                    setCurrentQuestionIndex(currentQuestionIndex - 1);
+                    setSelectedOptions([]);
+                }
+            };
+
+            const handleOptionSelect = async (option) => {
+                if (currentQuestion.multiSelect) {
+                    handleMultiSelectToggle(option);
+                } else {
+                    // 单选题：直接创建答案并跳转，不依赖状态更新
+                    const newAnswer = {
+                        questionId: currentQuestion.id,
+                        optionId: option.id,
+                        tags: option.tags,
+                        question: currentQuestion.question,
+                        answer: option.text,
+                    };
+
+                    const updatedAnswers = [...userAnswers, newAnswer];
+                    setUserAnswers(updatedAnswers);
+
+                    if (currentQuestionIndex < quizQuestions.length - 1) {
+                        setCurrentQuestionIndex(currentQuestionIndex + 1);
+                    } else {
+                    setPage('loading');
+                    setTimeout(async () => {
+                        try {
+                            const analysisResult = await analyzeUnified(updatedAnswers);
+                            setResult(analysisResult);
+                            setPage('result');
+                        } catch (error) {
+                            console.error('分析出错:', error);
+                            setResult(analyzeAndRecommend(updatedAnswers));
+                            setPage('result');
+                        }
+                    }, 1200);
+                    }
+                }
+            };
+
+            const handleTextInputSubmit = () => {
+                if (!textInput.trim()) {
+                    alert('请输入城市名称');
+                    return;
+                }
+
+                const newAnswer = {
+                    questionId: currentQuestion.id,
+                    optionId: 'text-input',
+                    tags: ['departure-custom', textInput], // 使用城市名称作为标签
+                    question: currentQuestion.question,
+                    answer: textInput,
+                    textInput: textInput // 保存用户输入的城市名称
+                };
+
+                const updatedAnswers = [...userAnswers, newAnswer];
+                setUserAnswers(updatedAnswers);
+                setTextInput('');
+
+                if (currentQuestionIndex < quizQuestions.length - 1) {
+                    setCurrentQuestionIndex(currentQuestionIndex + 1);
+                } else {
+                    setPage('loading');
+                    setTimeout(async () => {
+                        try {
+                            const analysisResult = await analyzeUnified(updatedAnswers);
+                            setResult(analysisResult);
+                            setPage('result');
+                        } catch (error) {
+                            console.error('分析出错:', error);
+                            setResult(analyzeAndRecommend(updatedAnswers));
+                            setPage('result');
+                        }
+                    }, 1200);
+                }
+            };
+
+            const handleRestart = () => {
+                setPage('welcome');
+                setCurrentQuestionIndex(0);
+                setUserAnswers([]);
+                setResult(null);
+            };
+
+            const handleGenerateItinerary = () => {
+                alert('此功能正在开发中，敬请期待！');
+            };
+
+            // 欢迎页面
+            if (page === 'welcome') {
+                return React.createElement('div', {
+                    className: 'fixed inset-0 overflow-hidden'
+                }, [
+                    React.createElement('div', {
+                        key: 'background',
+                        className: 'absolute inset-0 z-0'
+                    }, [
+                        React.createElement('img', {
+                            key: 'bg-image',
+                            src: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1920&q=80',
+                            alt: 'Background',
+                            className: 'w-full h-full object-cover'
+                        }),
+                        React.createElement('div', {
+                            key: 'bg-overlay',
+                            className: 'absolute inset-0 bg-black/60'
+                        })
+                    ]),
+                    React.createElement('div', {
+                        key: 'content',
+                        className: 'relative z-10 flex flex-col items-center justify-center min-h-screen px-4'
+                    }, [
+                        React.createElement('div', {
+                            key: 'container',
+                            className: 'text-center max-w-3xl'
+                        }, [
+                            React.createElement('div', {
+                                key: 'logo',
+                                className: 'text-8xl mb-6'
+                            }, '🌍'),
+                            React.createElement('h1', {
+                                key: 'title',
+                                className: 'text-5xl md:text-6xl font-bold text-white mb-6'
+                            }, 'VibeTrip'),
+                            React.createElement('h2', {
+                                key: 'subtitle',
+                                className: 'text-2xl md:text-3xl text-white/90 mb-8'
+                            }, '发现你的旅行人格，探索最适合你的目的地'),
+                            React.createElement('div', {
+                                key: 'description',
+                                className: 'text-lg text-white/80 mb-12 leading-relaxed'
+                            }, [
+                                React.createElement('p', {
+                                key: 'desc1',
+                                className: 'mb-4'
+                            }, '通过13道精心设计的心理测试题目，我们将深入分析你的旅行偏好、出发城市、交通方式和时间预算，为你推荐最契合的旅行目的地。'),
+                                React.createElement('p', {
+                                    key: 'desc2'
+                                }, '无论你是热爱冒险的探索者，还是追求放松的度假者，VibeTrip都能帮你找到那个让你心动的目的地。')
+                            ]),
+                            React.createElement('button', {
+                                key: 'start-btn',
+                                onClick: handleStartQuiz,
+                                className: 'px-12 py-4 bg-primary hover:bg-primary/80 text-white text-xl font-semibold rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105'
+                            }, '开始测试')
+                        ])
+                    ])
+                ]);
+            }
+
+            // 加载页面
+            if (page === 'loading') {
+                return React.createElement('div', {
+                    className: 'fixed inset-0 flex flex-col items-center justify-center bg-black/90 text-white'
+                }, [
+                    React.createElement('div', {
+                        key: 'loading-text',
+                        className: 'text-2xl font-bold mb-8 text-center px-4'
+                    }, 'AI 正在分析你的灵魂，寻找最契合的旅行目的地...'),
+                    React.createElement('div', {
+                        key: 'loading-spinner',
+                        className: 'w-24 h-24 border-4 border-t-primary border-white rounded-full animate-spin'
+                    })
+                ]);
+            }
+
+            // 结果页面
+            if (page === 'result') {
+                if (!result || !result.destinations) {
+                    return React.createElement('div', {
+                        className: 'fixed inset-0 flex items-center justify-center bg-black/90 text-white'
+                    }, [
+                        React.createElement('div', {
+                            key: 'error',
+                            className: 'text-center'
+                        }, [
+                            React.createElement('h2', {
+                                key: 'error-title',
+                                className: 'text-2xl font-bold mb-4'
+                            }, '结果加载失败'),
+                            React.createElement('button', {
+                                key: 'retry-btn',
+                                onClick: handleRestart,
+                                className: 'px-6 py-3 bg-primary hover:bg-primary/80 rounded-lg'
+                            }, '重新测试')
+                        ])
+                    ]);
+                }
+
+                return React.createElement('div', {
+                    className: 'min-h-screen bg-gradient-custom text-white'
+                }, [
+                    React.createElement('div', {
+                        key: 'container',
+                        className: 'container mx-auto px-4 py-16'
+                    }, [
+                        React.createElement('div', {
+                            key: 'result-header',
+                            className: 'text-center mb-12'
+                        }, [
+                            React.createElement('div', {
+                                key: 'emoji',
+                                className: 'text-6xl mb-4'
+                            }, result.persona_emoji),
+                            React.createElement('h1', {
+                                key: 'title',
+                                className: 'text-4xl font-bold mb-6'
+                            }, result.persona_title),
+                            React.createElement('p', {
+                                key: 'analysis',
+                                className: 'text-xl max-w-2xl mx-auto leading-relaxed'
+                            }, result.analysis)
+                        ]),
+                        React.createElement('div', {
+                            key: 'destinations',
+                            className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12'
+                        }, result.destinations.map((destination, index) => 
+                            React.createElement('div', {
+                                key: index,
+                                className: 'relative rounded-xl overflow-hidden h-80 hover:scale-105 transition-transform duration-300'
+                            }, [
+                                React.createElement('div', {
+                                    key: 'overlay',
+                                    className: 'absolute inset-0 bg-black/40 z-10'
+                                }),
+                                React.createElement('img', {
+                                    key: 'image',
+                                    src: destination.image_url,
+                                    alt: destination.name,
+                                    className: 'absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-110',
+                                    onError: (e) => {
+                                        e.target.src = `https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80`;
+                                    }
+                                }),
+                                React.createElement('div', {
+                                    key: 'content',
+                                    className: 'absolute inset-0 z-20 flex flex-col justify-end p-6'
+                                }, [
+                                    React.createElement('h3', {
+                                        key: 'name',
+                                        className: 'text-2xl font-bold mb-1'
+                                    }, destination.name),
+                                    React.createElement('p', {
+                                        key: 'country',
+                                        className: 'text-sm mb-3 opacity-90'
+                                    }, destination.country),
+                                    React.createElement('p', {
+                                        key: 'reason',
+                                        className: 'text-sm'
+                                    }, destination.reason)
+                                ])
+                            ])
+                        )),
+                        React.createElement('div', {
+                            key: 'buttons',
+                            className: 'flex flex-col sm:flex-row justify-center gap-4'
+                        }, [
+                            React.createElement('button', {
+                                key: 'restart',
+                                onClick: handleRestart,
+                                className: 'px-8 py-3 bg-primary hover:bg-primary/80 rounded-lg font-semibold transition-all duration-300'
+                            }, '重新测试'),
+                            React.createElement('button', {
+                                key: 'itinerary',
+                                onClick: handleGenerateItinerary,
+                                className: 'px-8 py-3 bg-white text-blue-900 hover:bg-gray-100 rounded-lg font-semibold transition-all duration-300'
+                            }, '生成详细行程')
+                        ])
+                    ])
+                ]);
+            }
+
+            // 测试页面
+            return React.createElement('div', {
+                className: 'fixed inset-0 overflow-hidden'
+            }, [
+                React.createElement('div', {
+                    key: 'background',
+                    className: 'absolute inset-0 z-0'
+                }, [
+                    React.createElement('img', {
+                        key: 'bg-image',
+                        src: currentImageUrl,
+                        alt: 'Background',
+                        className: 'w-full h-full object-cover'
+                    }),
+                    React.createElement('div', {
+                        key: 'bg-overlay',
+                        className: 'absolute inset-0 bg-black/60'
+                    })
+                ]),
+                React.createElement('div', {
+                    key: 'content',
+                    className: 'relative z-10 flex flex-col items-center justify-center min-h-screen px-4'
+                }, [
+                    React.createElement('div', {
+                        key: 'container',
+                        className: 'w-full max-w-4xl'
+                    }, [
+                        React.createElement('div', {
+                            key: 'progress',
+                            className: 'mb-4 text-center'
+                        }, [
+                            React.createElement('span', {
+                                key: 'progress-text',
+                                className: 'text-white/80 text-sm'
+                            }, `问题 ${currentQuestionIndex + 1} / ${quizQuestions.length}`),
+                            React.createElement('div', {
+                                key: 'progress-bar',
+                                className: 'w-full h-1 bg-white/20 rounded-full mt-2'
+                            }, [
+                                React.createElement('div', {
+                                    key: 'progress-fill',
+                                    className: 'h-full bg-primary rounded-full transition-all duration-500',
+                                    style: {
+                                        width: `${((currentQuestionIndex + 1) / quizQuestions.length) * 100}%`
+                                    }
+                                })
+                            ])
+                        ]),
+                        React.createElement('div', {
+                            key: 'question',
+                            className: 'text-center mb-12'
+                        }, [
+                            React.createElement('h2', {
+                                key: 'question-text',
+                                className: 'text-3xl md:text-4xl font-bold text-white mb-8'
+                            }, currentQuestion.question),
+                            currentQuestion.type === 'text-input' ? 
+                                React.createElement('div', {
+                                    key: 'text-input-container',
+                                    className: 'max-w-2xl mx-auto'
+                                }, [
+                                    React.createElement('input', {
+                                        key: 'text-input',
+                                        type: 'text',
+                                        value: textInput,
+                                        onChange: (e) => setTextInput(e.target.value),
+                                        placeholder: currentQuestion.placeholder || '请输入...',
+                                        className: 'w-full px-6 py-4 rounded-xl bg-white/10 border-2 border-white/20 text-white text-lg placeholder-white/50 focus:outline-none focus:border-primary transition-all duration-300',
+                                        onKeyPress: (e) => {
+                                            if (e.key === 'Enter') {
+                                                handleTextInputSubmit();
+                                            }
+                                        }
+                                    }),
+                                    React.createElement('div', {
+                                        key: 'navigation-buttons',
+                                        className: 'flex justify-between items-center mt-6'
+                                    }, [
+                                        React.createElement('button', {
+                                            key: 'previous-button',
+                                            onClick: handlePreviousQuestion,
+                                            disabled: currentQuestionIndex === 0,
+                                            className: `px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${currentQuestionIndex === 0 ? 'bg-white/20 text-white/50 cursor-not-allowed' : 'bg-white/20 text-white hover:bg-white/30'}`
+                                        }, '上一题'),
+                                        React.createElement('button', {
+                                            key: 'submit-button',
+                                            onClick: handleTextInputSubmit,
+                                            className: 'px-8 py-3 bg-primary hover:bg-primary/80 text-white text-lg font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl'
+                                        }, '确认')
+                                    ])
+                                ]) :
+                                React.createElement('div', {
+                                    key: 'options-container',
+                                    className: 'space-y-6'
+                                }, [
+                                    React.createElement('div', {
+                                        key: 'options',
+                                        className: 'grid grid-cols-1 md:grid-cols-2 gap-6'
+                                    }, currentQuestion.options.map((option) => {
+                                        const isSelected = selectedOptions.some(opt => opt.id === option.id);
+                                        return React.createElement('button', {
+                                            key: option.id,
+                                            onClick: () => handleOptionSelect(option),
+                                            className: `glass-effect rounded-xl p-6 text-left transition-all duration-300 hover:bg-white/15 hover:shadow-lg ${isSelected ? 'ring-2 ring-primary bg-white/20' : ''}`
+                                        }, [
+                                            React.createElement('p', {
+                                                key: 'option-text',
+                                                className: 'text-white text-lg font-medium'
+                                            }, option.text)
+                                        ]);
+                                    })),
+                                    currentQuestion.multiSelect ? 
+                                        React.createElement('div', {
+                                            key: 'navigation-buttons',
+                                            className: 'flex justify-between items-center mt-8'
+                                        }, [
+                                            React.createElement('button', {
+                                                key: 'previous-button',
+                                                onClick: handlePreviousQuestion,
+                                                disabled: currentQuestionIndex === 0,
+                                                className: `px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${currentQuestionIndex === 0 ? 'bg-white/20 text-white/50 cursor-not-allowed' : 'bg-white/20 text-white hover:bg-white/30'}`
+                                            }, '上一题'),
+                                            React.createElement('div', {
+                                                key: 'selection-info',
+                                                className: 'text-white/80 text-sm'
+                                            }, `已选择 ${selectedOptions.length} 个选项`),
+                                            React.createElement('button', {
+                                                key: 'next-button',
+                                                onClick: handleNextQuestion,
+                                                disabled: selectedOptions.length === 0,
+                                                className: `px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${selectedOptions.length === 0 ? 'bg-primary/50 text-white/50 cursor-not-allowed' : 'bg-primary text-white hover:bg-primary/80'}`
+                                            }, currentQuestionIndex === quizQuestions.length - 1 ? '完成' : '下一题')
+                                        ]) :
+                                        React.createElement('div', {
+                                            key: 'navigation-buttons',
+                                            className: 'flex justify-between items-center mt-8'
+                                        }, [
+                                            React.createElement('button', {
+                                                key: 'previous-button',
+                                                onClick: handlePreviousQuestion,
+                                                disabled: currentQuestionIndex === 0,
+                                                className: `px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${currentQuestionIndex === 0 ? 'bg-white/20 text-white/50 cursor-not-allowed' : 'bg-white/20 text-white hover:bg-white/30'}`
+                                            }, '上一题'),
+                                            React.createElement('div', {
+                                                key: 'spacer',
+                                                className: 'flex-1'
+                                            })
+                                        ])
+                                ])
+                        ])
+                    ])
+                ])
+            ]);
+        };
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                if (typeof window.__ensureVibeTripReact === 'function') {
+                    await window.__ensureVibeTripReact();
+                }
+            } catch (e) {
+            }
+
+            if (!window.React || !window.ReactDOM) {
+                const root = document.getElementById('app');
+                if (root) {
+                    root.innerHTML = '<div style="padding:24px;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#111;line-height:1.6"><div style="font-size:18px;font-weight:700;margin-bottom:8px">页面依赖加载失败</div><div style="margin-bottom:8px">当前无法加载 React 依赖（常见原因：网络受限/被拦截）。</div><div>建议：1）切换网络或关闭拦截；2）用本地服务器打开（不要直接双击 HTML）；3）如需离线可用，我可以把页面改成纯原生 JS 版本。</div></div>';
+                }
+                return;
+            }
+
+            try {
+                ReactDOM.render(
+                    React.createElement(App),
+                    document.getElementById('app')
+                );
+            } catch (e) {
+                const root = document.getElementById('app');
+                if (root) {
+                    const message = e && e.message ? String(e.message) : '未知错误';
+                    root.innerHTML = `<div style="padding:24px;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#111;line-height:1.6"><div style="font-size:18px;font-weight:700;margin-bottom:8px">页面脚本运行出错</div><div style="margin-bottom:8px">${message}</div><div>建议：按 F12 打开控制台查看详细报错位置，然后把报错内容发我，我可以继续精确修复。</div></div>`;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
